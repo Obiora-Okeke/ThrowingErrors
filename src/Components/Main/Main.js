@@ -1,19 +1,25 @@
 import {
-  html,
   useEffect,
   useState,
 } from "react";
-import { getAllRecipes } from "../../Services/Recipes.js";
+import { getAllRecipes, Recipes } from "../../Common/Services/LearnService.js";
 import MainList from "../List/List.js";
 
 const Main = () => {
   //parent component
   const [recipes, setRecipes] = useState([]);
 
+  // UseEffect to run when the page loads to
+  // obtain async data and render
   useEffect(() => {
-    getAllRecipes().then((recipes) => {
-      setRecipes(recipes);
-    });
+    if (Recipes.collection.length) {
+      setRecipes(Recipes.collection);
+    } else {
+      getAllRecipes().then((recipes) => {
+        console.log(recipes);
+        setRecipes(recipes);
+      });
+    }
   }, []);
 
   //Based on the example provided at https://react.dev/reference/react-dom/components/form
@@ -27,7 +33,7 @@ const Main = () => {
   }
 
   //WIP
-  return html`
+  return (
     <div>
       <h1>Feature 4 - Throwing Errors</h1>
       <h3>Obiora Okeke, Benjamin Pable</h3>
@@ -44,14 +50,14 @@ const Main = () => {
           >Source for recipes.json</a
         >
       </p>
-      <form onSubmit=${search}>
+      <form onSubmit={search}>
         <input name="query" placeholder="Search recipes..." />
         <button type="submit">Search</button>
       </form>
 
-      <${MainList} recipes=${recipes} />
+      <div> {MainList(recipes)} </div>
     </div>
-  `;
+  );
 };
 
 export default Main;
