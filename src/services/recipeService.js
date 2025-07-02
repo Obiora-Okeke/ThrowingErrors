@@ -27,5 +27,6 @@ export const getRecipeById = async (id) => {
     author: result.get('Author'),
     ingredients: result.get('Ingredients'),
     method: result.get('Method'),
+    pointer: result
   };
 };

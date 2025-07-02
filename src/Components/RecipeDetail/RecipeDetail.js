@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getRecipeById } from '../../services/recipeService';
+import { createReview } from '../../Common/Services/LearnService';
 
 const RecipeDetail = () => {
   const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
+
+  const [rating, setRating] = useState("");
+  const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
     getRecipeById(id).then(setRecipe);
@@ -13,9 +17,11 @@ const RecipeDetail = () => {
   if (!recipe) return <p>Loading...</p>;
 
   const handleSubmit = (e) => {
-    //send this data to the backend
+    e.preventDefault();
+    createReview(recipe.id, rating, feedback);
     alert("Thank you for your review!");
   };
+
 
   return (
     <div>
@@ -36,12 +42,19 @@ const RecipeDetail = () => {
             <button
               key={star}
               type="button"
+              onClick={() => setRating(star)}
+              style={{
+                color: star <= rating ? "gold" : "gray",
+                fontSize: "20px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                }}
             >
               ★
             </button>
           ))}
         </div>
-
         <div>
           <label htmlFor="feedback">Feedback:</label>
           <br />
@@ -49,6 +62,9 @@ const RecipeDetail = () => {
             id="feedback"
             rows="5"
             cols="40"
+            value={feedback}
+            onChange={(e) => {
+              setFeedback(e.target.value)}}
             placeholder="Write your feedback here..."
             required
           />
