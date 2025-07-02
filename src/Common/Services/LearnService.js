@@ -14,8 +14,32 @@ export const createRecipe = (Name) => {
   });
 };
 
+// CREATE operation - new recipe with Name
+export const createReview = (Recipe, Rating, Feedback) => {
+  console.log("Creating Review");
+  const Review = Parse.Object.extend("Review");
+  const review = new Review();
+  // using setter to UPDATE the object
+  review.set("recipe", Recipe);
+  review.set("rating", Recipe);
+  review.set("feedback", Recipe);
+  return review.save().then((result) => {
+    // returns new Recipe object
+    return result;
+  });
+};
+
 // READ operation - get recipe by ID
-export const getById = (id) => {
+export const getRecipeById = (id) => {
+  const Recipe = Parse.Object.extend("Recipe");
+  const query = new Parse.Query(Recipe);
+  return query.get(id).then((result) => {
+    // return Recipe object with objectId: id
+    return result;
+  });
+};
+
+export const getReviewById = (id) => {
   const Recipe = Parse.Object.extend("Recipe");
   const query = new Parse.Query(Recipe);
   return query.get(id).then((result) => {
@@ -25,6 +49,9 @@ export const getById = (id) => {
 };
 
 export let Recipes = {};
+Recipes.collection = [];
+
+export let Reviews = {};
 Recipes.collection = [];
 
 // READ operation - get all recipes in Parse class Recipe
@@ -49,6 +76,30 @@ export const removeRecipe = (id) => {
   const query = new Parse.Query(Recipe);
   return query.get(id).then((recipe) => {
     recipe.destroy();
+  });
+};
+
+export const getAllReviews = () => {
+  const Review = Parse.Object.extend("Review");
+  const query = new Parse.Query(Review);
+  return query
+    .find()
+    .then((results) => {
+      console.log("results: ", results);
+      // returns array of Review objects
+      return results;
+    })
+    .catch((error) => {
+      console.log("error: ", error);
+    });
+};
+
+// DELETE operation - remove review by ID
+export const removeReview = (id) => {
+  const Review = Parse.Object.extend("Review");
+  const query = new Parse.Query(Review);
+  return query.get(id).then((review) => {
+    review.destroy();
   });
 };
 
