@@ -2,8 +2,9 @@ import {
   useEffect,
   useState,
 } from "react";
-import { getAllRecipes, Recipes } from "../../Common/Services/LearnService.js";
+import { Recipes } from "../../Common/Services/LearnService.js";
 import MainList from "../List/List.js";
+import Parse from "parse";
 
 const Main = () => {
   //parent component
@@ -13,9 +14,12 @@ const Main = () => {
   // obtain async data and render
   useEffect(() => {
     if (Recipes.collection.length) {
-      setRecipes(Recipes.collection);
+        console.log(recipes);
+      setRecipes(Recipes.collection); 
     } else {
-      getAllRecipes().then((recipes) => {
+      const Recipe = Parse.Object.extend("Recipes")
+      const query = new Parse.Query(Recipe);
+      query.find().then((recipes) => {
         console.log(recipes);
         setRecipes(recipes);
       });

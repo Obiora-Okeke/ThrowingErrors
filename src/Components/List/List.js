@@ -7,10 +7,10 @@ const MainList = ({ recipes }) => {
       <hr />
       Take a look at our recipes!
       <ul>
-        ${recipes?.map(
+        {recipes?.map(
           (recipe) =>
             ( <li key="{recipe}">
-              ${recipe.Name} | ${recipe.Description}
+              {recipe.Name} | {recipe.Description}
               <br />
               <br />
               <form id="reviewForm">
