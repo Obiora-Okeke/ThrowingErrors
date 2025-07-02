@@ -5,6 +5,8 @@ import { getAllRecipes } from '../../services/recipeService';
 const Main = () => {
   const [recipes, setRecipes] = useState([]);
 
+  // UseEffect to run when the page loads to
+  // obtain async data and render
   useEffect(() => {
     getAllRecipes().then(setRecipes);
   }, []);
