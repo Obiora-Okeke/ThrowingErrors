@@ -20,7 +20,7 @@ function App() {
         <Route path="/recipe/:id" element={<RecipeDetail />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/register" element={<AuthRegister />} />
-        <Route path="/user" element={<User />} />
+        <Route path="/user" element={<User/>} />
         <Route path="/login" element={<AuthLogin />} />
         <Route path="/logout" element={<Logout />} />
       </Routes>

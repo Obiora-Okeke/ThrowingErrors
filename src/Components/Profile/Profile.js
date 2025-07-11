@@ -18,13 +18,9 @@ const MainHome = () => {
     }
   }, []);
 
-  // In this case the flag is acquired through a check box, but it could also be received through another method
-  // check the parse api docs for Parse.User() methods (authorized)
-
   return (
     <div>
       <ProtectedRoute exact path="/user" flag={flag} element={User} />
-      {/* <Route path="" element={}/> */}
     </div>
   );
 };
