@@ -26,6 +26,8 @@ const User = () => {
     <div>
       {check ? (
         <Navigate to={"/"} replace />
+      ) : !userInfo ? (
+        <p>Loading user info...</p>
       ) : (
         <div>
           <h2>User</h2>

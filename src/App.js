@@ -9,20 +9,63 @@ import Logout from "./Components/Auth/AuthLogout";
 import RecipeDetail from './Components/RecipeDetail/RecipeDetail';
 import Profile from './Components/Profile/Profile';
 import User from './Components/Profile/User';
+import ProtectedRoute from './Components/ProtectedRoute';
+import { Navigate } from 'react-router-dom'; 
 
 function App() {
   return (
     <Router>
       <Nav />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/recipes" element={<Main />} />
-        <Route path="/recipe/:id" element={<RecipeDetail />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/register" element={<AuthRegister />} />
-        <Route path="/user" element={<User/>} />
+        {/* Public routes */}
         <Route path="/login" element={<AuthLogin />} />
+        <Route path="/register" element={<AuthRegister />} />
         <Route path="/logout" element={<Logout />} />
+
+        {/* Protected routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes"
+          element={
+            <ProtectedRoute>
+              <Main />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipe/:id"
+          element={
+            <ProtectedRoute>
+              <RecipeDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user"
+          element={
+            <ProtectedRoute>
+              <User />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Optional catch-all redirect */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );
