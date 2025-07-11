@@ -24,7 +24,8 @@ export const createReview = (RecipeID, rating, feedback) => {
   const attributes = {
     recipe: recipePointer,  // must be a valid Parse.Object or pointer object
     Rating: rating,
-    Feedback: feedback
+    Feedback: feedback,
+    author: Parse.User.current()
   };
 
   const Review = Parse.Object.extend("Review");

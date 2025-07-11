@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getRecipeById } from '../../services/recipeService';
 import { createReview } from '../../Common/Services/LearnService';
+import { checkUser } from "../Auth/AuthService";
 
 const RecipeDetail = () => {
   const { id } = useParams();
@@ -18,8 +19,13 @@ const RecipeDetail = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createReview(recipe.id, rating, feedback);
-    alert("Thank you for your review!");
+    if(checkUser()) {    
+      createReview(recipe.id, rating, feedback);
+      alert("Thank you for your review!");
+      return;
+    }
+    alert("Please log in to leave a review");
+
   };
 
 
