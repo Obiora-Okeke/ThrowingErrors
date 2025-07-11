@@ -15,18 +15,22 @@ export const createRecipe = (Name) => {
 };
 
 // CREATE operation - new recipe with Name
-export const createReview = (Recipe, Rating, Feedback) => {
+export const createReview = (RecipeID, rating, feedback) => {
   console.log("Creating Review");
+
+  const recipePointer = new Parse.Object("Recipes");
+  recipePointer.id = RecipeID;
+
+  const attributes = {
+    recipe: recipePointer,  // must be a valid Parse.Object or pointer object
+    Rating: rating,
+    Feedback: feedback,
+    author: Parse.User.current()
+  };
+
   const Review = Parse.Object.extend("Review");
-  const review = new Review();
-  // using setter to UPDATE the object
-  review.set("recipe", Recipe);
-  review.set("rating", Recipe);
-  review.set("feedback", Recipe);
-  return review.save().then((result) => {
-    // returns new Recipe object
-    return result;
-  });
+  const review = new Review(attributes);
+  review.save();
 };
 
 // READ operation - get recipe by ID
