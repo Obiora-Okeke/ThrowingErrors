@@ -1,30 +1,15 @@
-import React from "react";
-import { Navigate, useNavigate } from "react-router-dom";
-import { checkUser } from '../Components/Auth/AuthService.js';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import Parse from '../parseConfig';
 
-
-const ProtectedRoute = ({ element: Component, flag, ...rest }) => {
-  const navigate = useNavigate();
-  const goBackHandler = () => {
-    navigate("/login");
-  };
-  console.log("rest: ", rest);
+const ProtectedRoute = ({ children }) => {
+  const currentUser = Parse.User.current();
   
-  // hint: you can swp out the Navigate redirect for the Component
-  // <Component />
-  const check = checkUser();
-
-  return (
-    <div>
-      {check ? (
-        <Navigate to={rest.path} replace />
-      ) : (
-        <div>
-          <p>Unauthorized! </p> <button onClick={goBackHandler}>Login.</button>
-        </div>
-      )}
-    </div>
-  );
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
 };
 
 export default ProtectedRoute;

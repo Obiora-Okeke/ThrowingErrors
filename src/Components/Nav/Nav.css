@@ -1,0 +1,49 @@
+/* Simple Navigation Styles - Just a bit better than basic */
+
+nav {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  color: #495057;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  background-color: #e9ecef;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.nav-links a.active {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .nav-links {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .nav-links a {
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { checkUser, createUser } from "./AuthService";
 import AuthForm from "./AuthForm";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const AuthRegister = () => {
   const navigate = useNavigate();
+  const hasShownAlert = useRef(false);
 
   const [newUser, setNewUser] = useState({
     firstName: "",
@@ -18,7 +19,8 @@ const AuthRegister = () => {
 
   // redirect already authenticated users back to home
   useEffect(() => {
-    if (checkUser()) {
+    if (checkUser() && !hasShownAlert.current) {
+      hasShownAlert.current = true;
       alert("You are already logged in");
       navigate("/");
     }
@@ -60,12 +62,15 @@ const AuthRegister = () => {
   };
 
   return (
-    <div>
+    <div className="auth-container">
       <AuthForm
         user={newUser}
         onChange={onChangeHandler}
         onSubmit={onSubmitHandler}
       />
+      <div className="auth-link">
+        Already have an account? <Link to="/login">Click here to login.</Link>
+      </div>
     </div>
   );
 };
