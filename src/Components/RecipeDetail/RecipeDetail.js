@@ -4,6 +4,9 @@ import { getRecipeById, getFavorites, toggleFavorite, getComments, addComment } 
 import { createReview } from '../../Common/Services/LearnService';
 import { checkUser } from "../Auth/AuthService";
 import CommentSection from '../UserSubmissions/CommentSection';
+import { uploadRecipeImage, getRecipeImages } from '../../services/imageService';
+import { getRecipeRating, StarRating } from '../../services/ratingService';
+import Parse from 'parse';
 
 const RecipeDetail = () => {
   const { id } = useParams(); // This is the objectId from the URL
@@ -64,18 +67,18 @@ const RecipeDetail = () => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
 
-  var recipeID = NaN;
+  // var currRecipe = NaN;
 
-    useEffect(() => {
-      getFavorites().then(favs => setIsFav(favs.some(r => r.id === recipeID)));
-      getComments(recipeID).then(setComments);
-    }, [recipeID]);
+  //   useEffect(() => {
+  //     getFavorites().then(favs => setIsFav(favs.some(r => r.id === currRecipe)));
+  //     getComments(currRecipe).then(setComments);
+  //   }, [currRecipe]);
 
   if (!recipe) return <p>Loading...</p>;
 
-  recipeID = recipe.id;
+  // currRecipe = recipe;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (checkUser()) {
       try {
