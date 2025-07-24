@@ -20,6 +20,7 @@ const User = () => {
       const Favorite = Parse.Object.extend("Favorite");
       const query = new Parse.Query(Favorite);
       query.equalTo("user", currentUser);
+      query.include(['recipe', 'recipeID'])
 
       try {
         const results = await query.find();
