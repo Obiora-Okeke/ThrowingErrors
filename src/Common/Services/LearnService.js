@@ -1,120 +1,60 @@
-import Parse from "parse";
-/* SERVICE FOR PARSE SERVER OPERATIONS */
+import Parse from '../../parseConfig';
 
-// CREATE operation - new recipe with Name
-export const createRecipe = (Name) => {
-  console.log("Creating: ", Name);
-  const Recipe = Parse.Object.extend("Recipe");
-  const recipe = new Recipe();
-  // using setter to UPDATE the object
-  recipe.set("name", Name);
-  return recipe.save().then((result) => {
-    // returns new Recipe object
-    return result;
-  });
+// Create a new review for a recipe
+export const createReview = async (recipeId, rating, feedback) => {
+  try {
+    const currentUser = Parse.User.current();
+    if (!currentUser) {
+      throw new Error('User must be logged in to create a review');
+    }
+
+    const Review = Parse.Object.extend('Review');
+    const review = new Review();
+    
+    // Create recipe pointer
+    const recipePointer = new Parse.Object('Recipes');
+    recipePointer.id = recipeId;
+    
+    review.set('recipe', recipePointer);
+    review.set('Rating', parseInt(rating));
+    review.set('Feedback', feedback);
+    review.set('user', currentUser);
+    
+    const savedReview = await review.save();
+    console.log('Review created successfully:', savedReview);
+    
+    return savedReview;
+  } catch (error) {
+    console.error('Error creating review:', error);
+    throw error;
+  }
 };
 
-// CREATE operation - new recipe with Name
-export const createReview = (RecipeID, rating, feedback) => {
-  console.log("Creating Review");
-
-  const recipePointer = new Parse.Object("Recipes");
-  recipePointer.id = RecipeID;
-
-  const attributes = {
-    recipe: recipePointer,  // must be a valid Parse.Object or pointer object
-    Rating: rating,
-    Feedback: feedback,
-    author: Parse.User.current()
-  };
-
-  const Review = Parse.Object.extend("Review");
-  const review = new Review(attributes);
-  review.save();
+// Get all reviews for a specific recipe
+export const getReviews = async (recipeId) => {
+  try {
+    const Review = Parse.Object.extend('Review');
+    const query = new Parse.Query(Review);
+    
+    // Create recipe pointer for query
+    const recipePointer = new Parse.Object('Recipes');
+    recipePointer.id = recipeId;
+    
+    query.equalTo('recipe', recipePointer);
+    query.include('user');
+    
+    const reviews = await query.find();
+    
+    return reviews.map(review => ({
+      id: review.id,
+      rating: review.get('Rating'),
+      feedback: review.get('Feedback'),
+      user: review.get('user') ? review.get('user').get('firstName') : 'Anonymous',
+      createdAt: review.createdAt
+    }));
+    
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    return [];
+  }
 };
-
-// READ operation - get recipe by ID
-export const getRecipeById = (id) => {
-  const Recipe = Parse.Object.extend("Recipe");
-  const query = new Parse.Query(Recipe);
-  return query.get(id).then((result) => {
-    // return Recipe object with objectId: id
-    return result;
-  });
-};
-
-export const getReviewById = (id) => {
-  const Recipe = Parse.Object.extend("Recipe");
-  const query = new Parse.Query(Recipe);
-  return query.get(id).then((result) => {
-    // return Recipe object with objectId: id
-    return result;
-  });
-};
-
-export let Recipes = {};
-Recipes.collection = [];
-
-export let Reviews = {};
-Recipes.collection = [];
-
-// READ operation - get all recipes in Parse class Recipe
-export const getAllRecipes = () => {
-  const Recipe = Parse.Object.extend("Recipe");
-  const query = new Parse.Query(Recipe);
-  return query
-    .find()
-    .then((results) => {
-      console.log("results: ", results);
-      // returns array of Recipe objects
-      return results;
-    })
-    .catch((error) => {
-      console.log("error: ", error);
-    });
-};
-
-// DELETE operation - remove recipe by ID
-export const removeRecipe = (id) => {
-  const Recipe = Parse.Object.extend("Recipe");
-  const query = new Parse.Query(Recipe);
-  return query.get(id).then((recipe) => {
-    recipe.destroy();
-  });
-};
-
-export const getAllReviews = () => {
-  const Review = Parse.Object.extend("Review");
-  const query = new Parse.Query(Review);
-  return query
-    .find()
-    .then((results) => {
-      console.log("results: ", results);
-      // returns array of Review objects
-      return results;
-    })
-    .catch((error) => {
-      console.log("error: ", error);
-    });
-};
-
-// DELETE operation - remove review by ID
-export const removeReview = (id) => {
-  const Review = Parse.Object.extend("Review");
-  const query = new Parse.Query(Review);
-  return query.get(id).then((review) => {
-    review.destroy();
-  });
-};
-
-// export const getArtistById = (id) => {
-
-// }
-
-// export const getAlbumByArtist = (artist) => {
-//   const Album = Parse.Object.extend("Album");
-//   const query = new Parse.Query(Album);
-//   query.equalTo("artist", artist); // not artist id, it's the whole artist parse object
-//   return query.find().then(results => results);
-//   // [{ParseObject}]
-// }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import List from '../List/List';
-import { getAllRecipes } from '../../services/recipeService';
+import { getAllRecipes } from '../../Common/Services/Recipes';
 
 const Main = () => {
   const [recipes, setRecipes] = useState([]);

@@ -1,12 +1,56 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import './Nav.css';
 
+const Nav = () => {
+  const location = useLocation();
 
-const Nav = () => (
-  <nav>
-    <Link to="/">Home</Link> | <Link to="/recipes">Recipes</Link> | <Link to="/login">Login</Link > | <Link to="/profile">Profile</Link > | <Link to="/logout">Logout</Link>
+  const isActiveLink = (path) => {
+    return location.pathname === path;
+  };
 
-  </nav>
-);
+  return (
+    <nav>
+      <div className="nav-links">
+        <Link 
+          to="/" 
+          className={isActiveLink('/') ? 'active' : ''}
+        >
+          Home
+        </Link>
+        <Link 
+          to="/recipes" 
+          className={isActiveLink('/recipes') ? 'active' : ''}
+        >
+          Recipes
+        </Link>
+        <Link 
+          to="/popular" 
+          className={isActiveLink('/popular') ? 'active' : ''}
+        >
+          Popular
+        </Link>
+        <Link 
+          to="/login" 
+          className={isActiveLink('/login') ? 'active' : ''}
+        >
+          Login
+        </Link>
+        <Link 
+          to="/profile" 
+          className={isActiveLink('/profile') ? 'active' : ''}
+        >
+          Profile
+        </Link>
+        <Link 
+          to="/logout" 
+          className={isActiveLink('/logout') ? 'active' : ''}
+        >
+          Logout
+        </Link>
+      </div>
+    </nav>
+  );
+};
 
 export default Nav;

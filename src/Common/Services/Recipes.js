@@ -1,43 +1,96 @@
-const axios = window.axios;
-const url =
-  "https://my-json-server.typicode.com/kellybuchanan/WebDev-Spring2021";
+import Parse from '../../parseConfig';
 
-export const createRecipe = (id, firstName, lastName, email, password) => {
-  return axios({
-    method: "post",
-    url: `${url}/recipes`,
-    data: {
-      id,
-      firstName,
-      lastName,
-      email,
-      password,
-    },
-    headers: {
-      "Content-Type": "application/json",
-    },
-    json: true,
-  })
-    .then((response) => {
-      console.log("POST response: ", response);
-    })
-    .catch((err) => {
-      console.log("POST error: ", err);
-    });
+// Get all recipes
+export const getAllRecipes = async () => {
+  try {
+    const Recipe = Parse.Object.extend('Recipes');
+    const query = new Parse.Query(Recipe);
+    
+    const recipes = await query.find();
+    
+    return recipes.map(recipe => ({
+      id: recipe.id,
+      name: recipe.get('Name'),
+      description: recipe.get('Description'),
+      ingredients: recipe.get('Ingredients'),
+      instructions: recipe.get('Instructions'),
+      prepTime: recipe.get('PrepTime'),
+      cookTime: recipe.get('CookTime'),
+      servings: recipe.get('Servings'),
+      difficulty: recipe.get('Difficulty'),
+      cuisine: recipe.get('Cuisine'),
+      image: recipe.get('Image'),
+      createdAt: recipe.createdAt,
+      updatedAt: recipe.updatedAt
+    }));
+    
+  } catch (error) {
+    console.error('Error fetching recipes:', error);
+    return [];
+  }
 };
 
-//function to extract the recipes
-export const getAllRecipes = () => {
-  return (
-    axios
-      // .get(`${url}/recipes`)
-      .get("./Services/recipes.json")
-      .then((response) => {
-        console.log(response.data);
-        return response.data;
-      })
-      .catch((err) => {
-        console.log("GET Error: ", err);
-      })
-  );
+// Get a single recipe by ID
+export const getRecipeById = async (recipeId) => {
+  try {
+    const Recipe = Parse.Object.extend('Recipes');
+    const query = new Parse.Query(Recipe);
+    
+    const recipe = await query.get(recipeId);
+    
+    return {
+      id: recipe.id,
+      name: recipe.get('Name'),
+      description: recipe.get('Description'),
+      ingredients: recipe.get('Ingredients'),
+      instructions: recipe.get('Instructions'),
+      prepTime: recipe.get('PrepTime'),
+      cookTime: recipe.get('CookTime'),
+      servings: recipe.get('Servings'),
+      difficulty: recipe.get('Difficulty'),
+      cuisine: recipe.get('Cuisine'),
+      image: recipe.get('Image'),
+      createdAt: recipe.createdAt,
+      updatedAt: recipe.updatedAt
+    };
+    
+  } catch (error) {
+    console.error('Error fetching recipe:', error);
+    return null;
+  }
+};
+
+// Search recipes by name or cuisine
+export const searchRecipes = async (searchTerm) => {
+  try {
+    const Recipe = Parse.Object.extend('Recipes');
+    const nameQuery = new Parse.Query(Recipe);
+    const cuisineQuery = new Parse.Query(Recipe);
+    
+    nameQuery.contains('Name', searchTerm);
+    cuisineQuery.contains('Cuisine', searchTerm);
+    
+    const mainQuery = Parse.Query.or(nameQuery, cuisineQuery);
+    const recipes = await mainQuery.find();
+    
+    return recipes.map(recipe => ({
+      id: recipe.id,
+      name: recipe.get('Name'),
+      description: recipe.get('Description'),
+      ingredients: recipe.get('Ingredients'),
+      instructions: recipe.get('Instructions'),
+      prepTime: recipe.get('PrepTime'),
+      cookTime: recipe.get('CookTime'),
+      servings: recipe.get('Servings'),
+      difficulty: recipe.get('Difficulty'),
+      cuisine: recipe.get('Cuisine'),
+      image: recipe.get('Image'),
+      createdAt: recipe.createdAt,
+      updatedAt: recipe.updatedAt
+    }));
+    
+  } catch (error) {
+    console.error('Error searching recipes:', error);
+    return [];
+  }
 };
