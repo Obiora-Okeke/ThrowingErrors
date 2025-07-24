@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { getRecipeById, getFavorites, toggleFavorite, getComments, addComment } from '../../services/recipeService';
-import { createReview } from '../../Common/Services/LearnService';
+import { getRecipeById } from '../../Common/Services/Recipes';
+import { createReview } from '../../services/ratingService';
 import { checkUser } from "../Auth/AuthService";
-import CommentSection from '../UserSubmissions/CommentSection';
 import { uploadRecipeImage, getRecipeImages } from '../../services/imageService';
 import { getRecipeRating, StarRating } from '../../services/ratingService';
 import Parse from 'parse';
@@ -17,9 +16,26 @@ const RecipeDetail = () => {
   const [rating, setRating] = useState("");
   const [feedback, setFeedback] = useState("");
 
+  const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState([]);
+
+  const [isFavorited, setIsFavorited] = useState(false);
   // State for image upload
   const [file, setFile] = useState(null);
   const [imageUrls, setImageUrls] = useState([]);
+
+  const checkFavoriteStatus = useCallback(async () => {
+    const currentUser = Parse.User.current();
+    if (!currentUser) return;
+
+    const Favorite = Parse.Object.extend("Favorite");
+    const query = new Parse.Query(Favorite);
+    query.equalTo("user", currentUser);
+    query.equalTo("recipe", new Parse.Object("Recipe").set("objectId", id));
+
+    const result = await query.first();
+    setIsFavorited(!!result);
+  }, [id]);
 
   const loadAllImages = useCallback(async () => {
     try {
@@ -63,20 +79,59 @@ const RecipeDetail = () => {
     }
   }, [id]);
 
-  const [isFav, setIsFav] = useState(false);
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
+  const loadComments = useCallback(async () => {
+    const Comment = Parse.Object.extend("Comment");
+    const query = new Parse.Query(Comment);
+    query.equalTo("recipe", new Parse.Object("Recipes").set("objectId", id));
+    query.include("author");
+    query.ascending("createdAt");
 
-  // var currRecipe = NaN;
+    try {
+      const results = await query.find();
+      setComments(results);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  }, [id]);
 
-  //   useEffect(() => {
-  //     getFavorites().then(favs => setIsFav(favs.some(r => r.id === currRecipe)));
-  //     getComments(currRecipe).then(setComments);
-  //   }, [currRecipe]);
+  useEffect(() => {
+    loadAllImages();
+    loadComments();
+    loadRecipeRating();
+    checkFavoriteStatus();
+
+  }, [loadAllImages, loadRecipeRating, loadComments, checkFavoriteStatus]);
 
   if (!recipe) return <p>Loading...</p>;
 
-  // currRecipe = recipe;
+  const toggleFavorite = async () => {
+    const currentUser = Parse.User.current();
+    if (!currentUser) {
+      alert("Please log in to favorite recipes.");
+      return;
+    }
+
+    const Favorite = Parse.Object.extend("Favorite");
+    const query = new Parse.Query(Favorite);
+    query.equalTo("user", currentUser);
+    query.equalTo("recipe", new Parse.Object("Recipe").set("objectId", id));
+
+    const existingFavorite = await query.first();
+
+    if (existingFavorite) {
+      await existingFavorite.destroy();
+      setIsFavorited(false);
+      alert("Removed from favorites.");
+    } else {
+      const favorite = new Favorite();
+      favorite.set("user", currentUser);
+      favorite.set("recipe", new Parse.Object("Recipe").set("objectId", id));
+      favorite.set("recipeName", recipe.name)
+      await favorite.save();
+      setIsFavorited(true);
+      alert("Added to favorites!");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -98,6 +153,35 @@ const RecipeDetail = () => {
       return;
     }
     alert("Please log in to leave a review");
+  };
+
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+
+    const currentUser = Parse.User.current();
+    if (!currentUser) {
+      alert("Please log in to post a comment.");
+      return;
+    }
+
+    const Comment = Parse.Object.extend("Comment");
+    const comment = new Comment();
+
+    const recipePointer = new Parse.Object("Recipe");
+    recipePointer.id = id;
+
+    comment.set("text", commentText);
+    comment.set("recipe", recipePointer);
+    comment.set("author", currentUser);
+
+    try {
+      await comment.save();
+      setCommentText("");
+      loadComments(); // Refresh comment list
+    } catch (error) {
+      console.error("Error saving comment:", error);
+      alert("Failed to post comment.");
+    }
   };
 
   const handleFileChange = (event) => {
@@ -144,23 +228,11 @@ const RecipeDetail = () => {
       alert(`Failed to upload image: ${error.message}`);
     }
   };
-  const handleToggleFav = async () => {
-    const status = await toggleFavorite(recipe);
-    setIsFav(status);
-  };
 
-  const handleAddComment = async () => {
-    if (!newComment.trim()) return;
-    await addComment(recipe.id, newComment);
-    const updated = await getComments(recipe.id);
-    setComments(updated);
-    setNewComment('');
-  };
 
   return (
     <div>
       <h1>{recipe.name}</h1>
-      <button onClick={handleToggleFav}>{isFav ? 'Unfavorite' : 'Favorite'}</button>
       <p>{recipe.description}</p>
       
       {/* Display overall rating */}
@@ -172,7 +244,10 @@ const RecipeDetail = () => {
           showCount={true}
         />
       </div>
-      
+      <button onClick={toggleFavorite} style={{ marginTop: "1em" }}>
+        {isFavorited ? "★ Remove from Favorites" : "☆ Add to Favorites"}
+      </button>
+
       <h4>Ingredients</h4>
       <ul>{recipe.ingredients?.map((i, idx) => <li key={idx}>{i}</li>)}</ul>
       <h4>Method</h4>
@@ -231,7 +306,6 @@ const RecipeDetail = () => {
             </button>
           ))}
         </div>
-
         <div>
           <label htmlFor="feedback">Feedback:</label>
           <br />
@@ -252,15 +326,39 @@ const RecipeDetail = () => {
           Submit Review
         </button>
       </form>
+      <div style={{ marginTop: '2em' }}>
+  <h2>Leave a Comment</h2>
+  <form onSubmit={handleCommentSubmit}>
+    <textarea
+      rows="4"
+      cols="50"
+      placeholder="Write your comment..."
+      value={commentText}
+      onChange={(e) => setCommentText(e.target.value)}
+      required
+    />
+    <br />
+    <button type="submit" style={{ marginTop: "10px" }}>Post Comment</button>
+  </form>
+    </div>
 
-      <CommentSection comments={comments} />
-      <textarea
-        value={newComment}
-        onChange={e => setNewComment(e.target.value)}
-        placeholder="Add a comment"
-      />
-      <button onClick={handleAddComment}>Post Comment</button>
-
+    {/* Display comments */}
+    <div style={{ marginTop: '2em' }}>
+      <h2>Comments</h2>
+      {comments.length === 0 ? (
+        <p>No comments yet.</p>
+      ) : (
+        <ul style={{ listStyleType: "none", padding: 0 }}>
+          {comments.map((comment) => (
+            <li key={comment.id} style={{ marginBottom: "1em", padding: "1em", backgroundColor: "#f1f1f1", borderRadius: "8px" }}>
+              <strong>{comment.get("author")?.get("username") || "Anonymous"}</strong>
+              <p>{comment.get("text")}</p>
+              <small>{new Date(comment.createdAt).toLocaleString()}</small>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
     </div>
   );
 };
