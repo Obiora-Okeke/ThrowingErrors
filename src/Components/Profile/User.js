@@ -10,6 +10,29 @@ const User = () => {
 
   const check = !checkUser();
 
+  const [favorites, setFavorites] = useState([]);
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      const currentUser = Parse.User.current();
+      if (!currentUser) return;
+
+      const Favorite = Parse.Object.extend("Favorite");
+      const query = new Parse.Query(Favorite);
+      query.equalTo("user", currentUser);
+      query.include(['recipe', 'recipeID'])
+
+      try {
+        const results = await query.find();
+        setFavorites(results.map(fav => fav.get("recipe")));
+      } catch (err) {
+        console.error("Failed to load favorites", err);
+      }
+    };
+
+    fetchFavorites();
+  }, []);
+
   useEffect(() => {
     const currentUser = Parse.User.current();
     if (currentUser) {
@@ -34,8 +57,30 @@ const User = () => {
           <p><strong>First Name:</strong> {userInfo.firstName}</p>
           <p><strong>Last Name:</strong> {userInfo.lastName}</p>
           <p><strong>Email:</strong> {userInfo.email}</p>
-          <br />
-          <br />
+          <hr />
+          <div>
+            <h3>My Favorite Recipes</h3>
+            {favorites.length === 0 ? (
+              <p>You have no favorite recipes yet.</p>
+            ) : (
+            <ul>
+              {favorites.map((fav) => {
+                console.log(fav.get('recipe'))
+                console.log('huh')
+                
+                const recipe = fav.get('recipe');
+                const recipeName = fav.get('recipeName');
+                return (
+                  <li key={recipe}>
+                    <p> {recipe} </p>
+                    <Link to={`${recipe}`}>{recipeName}</Link>
+                  </li>
+                );
+              })}
+            </ul>
+            )}
+          </div>
+          <hr />
           <Link to="/logout">Logout</Link >
         </div>
       )}

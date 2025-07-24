@@ -1,4 +1,5 @@
 import Parse from '../parseConfig';
+const Recipe = Parse.Object.extend('Recipe');
 
 export const getAllRecipes = async () => {
   const Recipe = Parse.Object.extend('Recipes');
@@ -39,3 +40,17 @@ export const getRecipeById = async (id) => {
     pointer: result,
   };
 };
+
+
+
+ export const createRecipe = async ({ name, ingredients, description, url, method }) => {
+    const recipe = new Recipe();
+    recipe.set('Name', name);
+    recipe.set('Description', description);
+    recipe.set('url', url);
+    recipe.set('Method', method);
+    recipe.set('Ingredients', ingredients);
+    recipe.set('Author', Parse.User.current());
+    return recipe.save();
+  };
+

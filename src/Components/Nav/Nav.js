@@ -37,8 +37,8 @@ const Nav = () => {
           Login
         </Link>
         <Link 
-          to="/profile" 
-          className={isActiveLink('/profile') ? 'active' : ''}
+          to="/user" 
+          className={isActiveLink('/user') ? 'active' : ''}
         >
           Profile
         </Link>
