@@ -4,11 +4,18 @@ import Parse from "parse";
 import { Link } from 'react-router-dom';
 import { checkUser } from "../Auth/AuthService";
 import { Navigate } from "react-router-dom";
+import { getFavorites } from '../../services/recipeService';
 
 const User = () => {
   const [userInfo, setUserInfo] = useState(null);
 
   const check = !checkUser();
+
+  const [favorites, setFavorites] = useState([]);
+
+  useEffect(() => {
+    getFavorites().then(setFavorites);
+  }, []);
 
   useEffect(() => {
     const currentUser = Parse.User.current();
@@ -34,8 +41,12 @@ const User = () => {
           <p><strong>First Name:</strong> {userInfo.firstName}</p>
           <p><strong>Last Name:</strong> {userInfo.lastName}</p>
           <p><strong>Email:</strong> {userInfo.email}</p>
-          <br />
-          <br />
+          <hr />
+          <h3>Favorite Recipes:</h3>
+            <ul>
+              {favorites.map(r => <li key={r.id}>{r.get('title')}</li>)}
+            </ul>
+          <hr />
           <Link to="/logout">Logout</Link >
         </div>
       )}

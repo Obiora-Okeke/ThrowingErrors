@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getRecipeById } from '../../services/recipeService';
+import { getRecipeById, getFavorites, toggleFavorite, getComments, addComment } from '../../services/recipeService';
 import { createReview } from '../../Common/Services/LearnService';
 import { checkUser } from "../Auth/AuthService";
+import CommentSection from '../UserSubmissions/CommentSection';
 
 const RecipeDetail = () => {
   const { id } = useParams();
@@ -15,7 +16,20 @@ const RecipeDetail = () => {
     getRecipeById(id).then(setRecipe);
   }, [id]);
 
+  const [isFav, setIsFav] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+
+  var recipeID = NaN;
+
+    useEffect(() => {
+      getFavorites().then(favs => setIsFav(favs.some(r => r.id === recipeID)));
+      getComments(recipeID).then(setComments);
+    }, [recipeID]);
+
   if (!recipe) return <p>Loading...</p>;
+
+  recipeID = recipe.id;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -28,10 +42,23 @@ const RecipeDetail = () => {
 
   };
 
+  const handleToggleFav = async () => {
+    const status = await toggleFavorite(recipe);
+    setIsFav(status);
+  };
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+    await addComment(recipe.id, newComment);
+    const updated = await getComments(recipe.id);
+    setComments(updated);
+    setNewComment('');
+  };
 
   return (
     <div>
       <h1>{recipe.name}</h1>
+      <button onClick={handleToggleFav}>{isFav ? 'Unfavorite' : 'Favorite'}</button>
       <p>{recipe.description}</p>
       <h4>Ingredients</h4>
       <ul>{recipe.ingredients?.map((i, idx) => <li key={idx}>{i}</li>)}</ul>
@@ -61,6 +88,7 @@ const RecipeDetail = () => {
             </button>
           ))}
         </div>
+
         <div>
           <label htmlFor="feedback">Feedback:</label>
           <br />
@@ -80,6 +108,15 @@ const RecipeDetail = () => {
           Submit Review
         </button>
       </form>
+
+      <CommentSection comments={comments} />
+      <textarea
+        value={newComment}
+        onChange={e => setNewComment(e.target.value)}
+        placeholder="Add a comment"
+      />
+      <button onClick={handleAddComment}>Post Comment</button>
+
     </div>
   );
 };
