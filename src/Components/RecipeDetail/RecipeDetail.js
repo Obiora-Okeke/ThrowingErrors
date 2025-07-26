@@ -114,7 +114,7 @@ const RecipeDetail = () => {
     const Favorite = Parse.Object.extend("Favorite");
     const query = new Parse.Query(Favorite);
     query.equalTo("user", currentUser);
-    query.equalTo("recipe", new Parse.Object("Recipe").set("objectId", id));
+    query.equalTo("recipe", id);
 
     const existingFavorite = await query.first();
 
@@ -125,7 +125,7 @@ const RecipeDetail = () => {
     } else {
       const favorite = new Favorite();
       favorite.set("user", currentUser);
-      favorite.set("recipe", new Parse.Object("Recipe").set("objectId", id));
+      favorite.set("recipe", id);
       favorite.set("recipeName", recipe.name)
       await favorite.save();
       setIsFavorited(true);
@@ -167,7 +167,7 @@ const RecipeDetail = () => {
     const Comment = Parse.Object.extend("Comment");
     const comment = new Comment();
 
-    const recipePointer = new Parse.Object("Recipe");
+    const recipePointer = new Parse.Object("Recipes");
     recipePointer.id = id;
 
     comment.set("text", commentText);
