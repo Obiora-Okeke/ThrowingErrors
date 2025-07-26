@@ -11,9 +11,10 @@ export const getAllRecipes = async () => {
     return recipes.map(recipe => ({
       id: recipe.id,
       name: recipe.get('Name'),
+      author: recipe.get('Author'),
       description: recipe.get('Description'),
       ingredients: recipe.get('Ingredients'),
-      instructions: recipe.get('Instructions'),
+      method: recipe.get('Method'),
       prepTime: recipe.get('PrepTime'),
       cookTime: recipe.get('CookTime'),
       servings: recipe.get('Servings'),
